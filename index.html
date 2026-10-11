@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz HQs Clássicas DC Comics</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dcDark: '#0a0a0c',
+                        dcCard: '#141419',
+                        dcYellow: '#FFD700',
+                        dcBlue: '#0055FF',
+                        dcRed: '#E50914',
+                        dcGreen: '#00E676',
+                        dcPurple: '#8E24AA',
+                    },
+                    fontFamily: {
+                        comic: ['Bangers', 'cursive'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0c;
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+        
+        .comic-border {
+            border: 4px solid #FFD700;
+            box-shadow: 6px 6px 0px #0055FF;
+        }
+
+        .comic-title {
+            font-family: 'Bangers', cursive;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px #E50914, 5px 5px 0px #000;
+        }
+
+        .comic-btn {
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1.5px;
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        .comic-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #FFD700;
+        }
+
+        .comic-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .option-btn {
+            border: 3px solid #333340;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #FFD700;
+            background-color: #1f1f2a;
+            transform: scale(1.01);
+        }
+
+        /* High visual feedback animations for deaf/deaf-blind accessible interaction */
+        @keyframes pulseSuccess {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 20px 10px rgba(0, 230, 118, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .animate-success {
+            animation: pulseSuccess 0.5s ease-in-out;
+            border-color: #00E676 !important;
+            background-color: rgba(0, 230, 118, 0.2) !important;
+            color: #FFFFFF !important;
+        }
+
+        .animate-error {
+            animation: shakeError 0.5s ease-in-out;
+            border-color: #E50914 !important;
+            background-color: rgba(229, 9, 20, 0.2) !important;
+            color: #FFFFFF !important;
+        }
+
+        .badge {
+            font-family: 'Bangers', cursive;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center p-3 sm:p-6">
+
+    <header class="w-full max-w-4xl flex flex-wrap justify-between items-center bg-dcCard p-4 rounded-xl border-2 border-dcYellow mb-4 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="bg-dcYellow text-black font-black text-2xl w-12 h-12 rounded-full flex items-center justify-center border-2 border-black">
+                DC
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl comic-title text-dcYellow leading-none">QUIZ HQS DC COMICS</h1>
+                <p class="text-xs text-gray-300 font-semibold tracking-wider">20 EDICÕES CLÁSSICAS • VISUAL & ACESSÍVEL</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-6 mt-2 sm:mt-0">
+            <div class="text-right">
+                <span class="text-xs text-gray-400 block font-bold">PERGUNTA</span>
+                <span id="question-tracker" class="text-xl font-black text-dcYellow">1 / 20</span>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-gray-400 block font-bold">PONTUAÇÃO</span>
+                <span id="score-tracker" class="text-xl font-black text-dcGreen">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-4xl flex-grow flex flex-col justify-center">
+
+        <!-- TELA 1: INÍCIO DO GAME -->
+        <section id="start-screen" class="bg-dcCard comic-border rounded-2xl p-6 sm:p-10 text-center flex flex-col items-center justify-center space-y-6">
+            <div class="w-24 h-24 bg-dcYellow text-black rounded-full flex items-center justify-center text-5xl shadow-xl border-4 border-black">
+                <i class="fa-solid fa-mask"></i>
+            </div>
+            
+            <h2 class="text-3xl sm:text-5xl comic-title text-dcYellow">
+                DESAFIO DE HQS DA DC!
+            </h2>
+            
+            <p class="text-lg sm:text-xl text-gray-200 max-w-2xl font-medium leading-relaxed">
+                Um quiz altamente visual preparado para alunos surdos! Responda sobre os maiores ícones, autores e anos de publicação de <strong class="text-dcYellow">20 HQs clássicas</strong> da DC Comics.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl text-left my-2">
+                <div class="bg-black/60 p-4 rounded-xl border border-dcYellow/30 flex items-center space-x-3">
+                    <i class="fa-solid fa-users text-dcYellow text-2xl"></i>
+                    <div>
+                        <p class="text-xs text-gray-400">Identifique</p>
+                        <p class="font-bold text-white text-sm">Personagens</p>
+                    </div>
+                </div>
+                <div class="bg-black/60 p-4 rounded-xl border border-dcYellow/30 flex items-center space-x-3">
+                    <i class="fa-solid fa-calendar-check text-dcYellow text-2xl"></i>
+                    <div>
+                        <p class="text-xs text-gray-400">Descubra</p>
+                        <p class="font-bold text-white text-sm">Anos de Publicação</p>
+                    </div>
+                </div>
+                <div class="bg-black/60 p-4 rounded-xl border border-dcYellow/30 flex items-center space-x-3">
+                    <i class="fa-solid fa-feather-pointed text-dcYellow text-2xl"></i>
+                    <div>
+                        <p class="text-xs text-gray-400">Reconheça</p>
+                        <p class="font-bold text-white text-sm">Roteiristas & Criadores</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="quizApp.startQuiz()" class="comic-btn bg-dcYellow text-black text-2xl px-10 py-4 rounded-xl border-2 border-black flex items-center space-x-3 hover:bg-yellow-400">
+                <span>INICIAR DESAFIO (20 PERGUNTAS)</span>
+                <i class="fa-solid fa-play"></i>
+            </button>
+        </section>
+
+        <!-- TELA 2: PERGUNTAS DO QUIZ -->
+        <section id="quiz-screen" class="hidden flex flex-col md:flex-row bg-dcCard comic-border rounded-2xl overflow-hidden min-h-[500px]">
+            
+            <!-- Coluna do Ícone Minimalista (Sem textos spoiler) -->
+            <div class="w-full md:w-5/12 bg-black p-6 flex flex-col justify-center items-center relative border-b-4 md:border-b-0 md:border-r-4 border-dcYellow">
+                <span id="comic-type-badge" class="absolute top-3 left-3 bg-dcBlue text-white badge px-3 py-1 rounded-md border border-white tracking-wider z-10 shadow">
+                    CATEGORIA
+                </span>
+                
+                <!-- Container do Ícone SVG Vetorial Representativo -->
+                <div id="icon-container" class="w-full max-w-[220px] aspect-square rounded-2xl flex items-center justify-center p-4 bg-dcDark border-2 border-dcYellow/50 shadow-2xl transition-transform duration-300 my-4">
+                    <!-- SVG do Ícone injetado dinamicamente via JS -->
+                </div>
+
+                <!-- Indicador visual simples sem spoilers -->
+                <div class="text-center mt-1">
+                    <span id="edition-symbol-label" class="text-dcYellow font-black text-sm uppercase tracking-widest block">
+                        ÍCONE SIMBÓLICO DA EDIÇÃO
+                    </span>
+                </div>
+            </div>
+
+            <!-- Coluna de Pergunta e Opções -->
+            <div class="w-full md:w-7/12 p-5 sm:p-7 flex flex-col justify-between">
+                
+                <div>
+                    <div class="flex items-center justify-between text-dcYellow font-bold text-sm mb-3 uppercase tracking-wider">
+                        <span class="flex items-center space-x-2">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span id="question-type-label">QUESTÃO X</span>
+                        </span>
+                        <span id="category-name-badge" class="bg-dcYellow/20 text-dcYellow px-2 py-0.5 rounded text-xs">
+                            CATEGORIA
+                        </span>
+                    </div>
+                    
+                    <h3 id="question-text" class="text-xl sm:text-2xl font-black text-white leading-snug mb-6">
+                        <!-- PerguntaJS -->
+                    </h3>
+
+                    <!-- Alternativas A, B, C, D -->
+                    <div id="options-container" class="grid grid-cols-1 gap-3">
+                        <!-- Opções JS -->
+                    </div>
+                </div>
+
+                <!-- Painel de Feedback Visual Inclusivo -->
+                <div id="feedback-panel" class="hidden mt-4 p-4 rounded-xl border-2 flex items-start space-x-3 transition-all duration-300">
+                    <div id="feedback-icon" class="text-3xl flex-shrink-0"></div>
+                    <div>
+                        <h4 id="feedback-title" class="font-bold text-lg leading-none mb-1"></h4>
+                        <p id="feedback-text" class="text-sm font-medium text-gray-200"></p>
+                    </div>
+                </div>
+
+                <!-- Botão Próximo -->
+                <div class="mt-5 flex justify-end">
+                    <button id="next-btn" onclick="quizApp.nextQuestion()" class="hidden comic-btn bg-dcBlue text-white text-xl px-8 py-3 rounded-xl border-2 border-white flex items-center space-x-2">
+                        <span>PRÓXIMA PERGUNTA</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TELA 3: RESULTADOS E DESEMPENHO -->
+        <section id="result-screen" class="hidden bg-dcCard comic-border rounded-2xl p-6 sm:p-10 text-center flex flex-col items-center justify-center space-y-6">
+            
+            <div id="result-badge" class="w-28 h-28 rounded-full flex items-center justify-center text-6xl shadow-2xl border-4 border-black">
+                <!-- Ícone via JS -->
+            </div>
+
+            <h2 id="result-title" class="text-4xl sm:text-6xl comic-title text-dcYellow">
+                RESULTADO FINAL
+            </h2>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full max-w-xl my-2">
+                <div class="bg-black/70 p-4 rounded-xl border border-dcYellow/40 text-center">
+                    <span class="text-xs text-gray-400 block font-bold">ACERTOS</span>
+                    <span id="final-correct" class="text-3xl font-black text-dcGreen">0 / 20</span>
+                </div>
+                <div class="bg-black/70 p-4 rounded-xl border border-dcYellow/40 text-center">
+                    <span class="text-xs text-gray-400 block font-bold">APROVEITAMENTO</span>
+                    <span id="final-percentage" class="text-3xl font-black text-dcYellow">0%</span>
+                </div>
+                <div class="bg-black/70 p-4 rounded-xl border border-dcYellow/40 text-center col-span-2 sm:col-span-1">
+                    <span class="text-xs text-gray-400 block font-bold">DESEMPENHO</span>
+                    <span id="final-rank" class="text-lg font-bold text-white">Classificação</span>
+                </div>
+            </div>
+
+            <p id="result-message" class="text-lg text-gray-200 max-w-md font-medium leading-relaxed">
+                <!-- Mensagem adaptada -->
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4 mt-4">
+                <button onclick="quizApp.restartQuiz()" class="comic-btn bg-dcYellow text-black text-xl px-8 py-3 rounded-xl border-2 border-black flex items-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>REINICIAR QUIZ (20 HQS)</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="w-full max-w-4xl text-center py-4 text-xs text-gray-400 font-medium flex flex-col sm:flex-row justify-between items-center border-t border-gray-800 mt-6">
+        <p class="flex items-center space-x-2">
+            <i class="fa-solid fa-eye text-dcYellow"></i>
+            <span>Recurso Visual Adaptado para a Educação de Alunos Surdos</span>
+        </p>
+        <p class="mt-2 sm:mt-0">Universo DC Comics • 20 Edições Clássicas</p>
+    </footer>
+
+    <script>
+        const SVGIcons = {
+            // Action Comics #1: Escudo do Superman
+            supermanShield: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <polygon points="100,15 175,55 155,145 100,185 45,145 25,55" fill="#E50914" stroke="#FFD700" stroke-width="8"/>
+                    <polygon points="100,28 162,62 145,138 100,172 55,138 38,62" fill="#FFD700"/>
+                    <path d="M 60,70 C 60,60 80,55 125,55 C 150,55 150,75 125,85 C 80,105 50,115 50,140 C 50,165 90,165 130,165 M 130,165 L 140,135 M 65,75 L 120,75" fill="none" stroke="#E50914" stroke-width="16" stroke-linecap="round"/>
+                </svg>`,
+
+            // Detective Comics #27: Máscara / Capuz Batman
+            batCowl: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="90" fill="#141419" stroke="#FFD700" stroke-width="6"/>
+                    <path d="M 40,110 L 55,40 L 80,85 L 120,85 L 145,40 L 160,110 Q 165,160 100,175 Q 35,160 40,110 Z" fill="#0055FF" stroke="#000" stroke-width="4"/>
+                    <polygon points="60,115 85,130 65,135" fill="#FFD700"/>
+                    <polygon points="140,115 115,130 135,135" fill="#FFD700"/>
+                </svg>`,
+
+            // Watchmen: Botão Smiley com Sangue
+            smileyBlood: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#FFD700" stroke="#000" stroke-width="8"/>
+                    <ellipse cx="70" cy="75" rx="8" ry="18" fill="#000"/>
+                    <ellipse cx="130" cy="75" rx="8" ry="18" fill="#000"/>
+                    <path d="M 55,115 Q 100,160 145,115" fill="none" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M 55,45 Q 70,70 65,100 Q 50,75 55,45 Z" fill="#E50914"/>
+                    <circle cx="68" cy="98" r="5" fill="#E50914"/>
+                </svg>`,
+
+            // Cavaleiro das Trevas: Morcego / Raio
+            batLightning: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#050B14" stroke="#0055FF" stroke-width="6"/>
+                    <polygon points="120,20 70,105 105,105 60,180 140,90 100,90" fill="#FFD700"/>
+                    <path d="M 30,100 Q 60,60 100,90 Q 140,60 170,100 Q 180,140 100,160 Q 20,140 30,100 Z" fill="#000" stroke="#FFF" stroke-width="3" opacity="0.8"/>
+                </svg>`,
+
+            // Piada Mortal: Sorriso Macabro Coringa
+            jokerSmile: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#141419" stroke="#8E24AA" stroke-width="8"/>
+                    <path d="M 30,100 Q 100,180 170,100 Q 100,120 30,100 Z" fill="#E50914" stroke="#FFF" stroke-width="4"/>
+                    <path d="M 45,105 Q 100,165 155,105" fill="none" stroke="#FFF" stroke-width="4"/>
+                    <line x1="70" y1="110" x2="70" y2="135" stroke="#FFF" stroke-width="3"/>
+                    <line x1="100" y1="112" x2="100" y2="142" stroke="#FFF" stroke-width="3"/>
+                    <line x1="130" y1="110" x2="130" y2="135" stroke="#FFF" stroke-width="3"/>
+                </svg>`,
+
+            // Reino do Amanhã: Símbolo do Superman Futurista
+            kingdomSymbol: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <polygon points="100,20 170,60 150,145 100,180 50,145 30,60" fill="#E50914" stroke="#000" stroke-width="6"/>
+                    <polygon points="50,60 150,60 135,85 75,145" fill="#000"/>
+                </svg>`,
+
+            // Sandman: Máscara / Yelmo dos Sonhos
+            dreamHelm: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0a0a0c" stroke="#8E24AA" stroke-width="6"/>
+                    <path d="M 60,60 Q 100,20 140,60 L 130,130 Q 100,170 70,130 Z" fill="#1f1f2e" stroke="#FFF" stroke-width="4"/>
+                    <circle cx="80" cy="85" r="12" fill="#8E24AA"/>
+                    <circle cx="120" cy="85" r="12" fill="#8E24AA"/>
+                    <path d="M 100,130 L 100,165" stroke="#FFF" stroke-width="6"/>
+                </svg>`,
+
+            // V de Vingança: Máscara Guy Fawkes / Letra V
+            vMask: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#E50914" stroke="#000" stroke-width="8"/>
+                    <circle cx="100" cy="100" r="70" fill="#FFF"/>
+                    <polygon points="60,50 100,140 140,50 120,50 100,105 80,50" fill="#E50914"/>
+                    <path d="M 70,145 Q 100,165 130,145" fill="none" stroke="#000" stroke-width="5"/>
+                </svg>`,
+
+            // Monstro do Pântano: Folha / Natureza Crânio
+            swampThing: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#1b381e" stroke="#00E676" stroke-width="6"/>
+                    <path d="M 100,30 C 140,60 160,110 100,170 C 40,110 60,60 100,30 Z" fill="#2e7d32" stroke="#00E676" stroke-width="4"/>
+                    <circle cx="80" cy="90" r="10" fill="#FFD700"/>
+                    <circle cx="120" cy="90" r="10" fill="#FFD700"/>
+                    <path d="M 75,130 Q 100,145 125,130" stroke="#000" stroke-width="4" fill="none"/>
+                </svg>`,
+
+            // Flashpoint: Raio do Flash sobre Fundo Vermelho
+            flashLightning: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#E50914" stroke="#FFD700" stroke-width="8"/>
+                    <circle cx="100" cy="100" r="55" fill="#FFF" stroke="#000" stroke-width="4"/>
+                    <polygon points="115,55 75,105 105,105 85,150 130,95 100,95" fill="#FFD700" stroke="#000" stroke-width="2"/>
+                </svg>`,
+
+            // Grandes Astros Superman: Sol Dourado
+            allStarSun: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0055FF" stroke="#FFD700" stroke-width="6"/>
+                    <circle cx="100" cy="100" r="50" fill="#FFD700"/>
+                    <!-- Raios Solares -->
+                    <path d="M 100,30 L 100,10 M 100,170 L 100,190 M 30,100 L 10,100 M 170,100 L 190,100 M 50,50 L 35,35 M 150,150 L 165,165 M 150,50 L 165,35 M 50,150 L 35,165" stroke="#FFD700" stroke-width="8" stroke-linecap="round"/>
+                </svg>`,
+
+            // Crise nas Infinitas Terras: Planeta Dividido / Multiverso
+            crisisGlobe: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0d001a" stroke="#E50914" stroke-width="6"/>
+                    <circle cx="100" cy="100" r="55" fill="#0055FF" stroke="#FFD700" stroke-width="4"/>
+                    <line x1="20" y1="20" x2="180" y2="180" stroke="#E50914" stroke-width="8"/>
+                    <line x1="180" y1="20" x2="20" y2="180" stroke="#FFD700" stroke-width="8"/>
+                </svg>`,
+
+            // Batman Ano Um: Morcego Minimalista
+            batYearOne: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#FFD700" stroke="#000" stroke-width="8"/>
+                    <path d="M 25,90 C 50,70 80,85 100,105 C 120,85 150,70 175,90 C 180,130 140,150 100,165 C 60,150 20,130 25,90 Z" fill="#000"/>
+                </svg>`,
+
+            // Crepúsculo Esmeralda: Anel Lanterna Verde
+            greenLanternRing: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0a0a0c" stroke="#00E676" stroke-width="8"/>
+                    <circle cx="100" cy="100" r="55" fill="#00E676"/>
+                    <circle cx="100" cy="100" r="25" fill="#0a0a0c"/>
+                    <line x1="60" y1="65" x2="140" y2="65" stroke="#00E676" stroke-width="12"/>
+                    <line x1="60" y1="135" x2="140" y2="135" stroke="#00E676" stroke-width="12"/>
+                </svg>`,
+
+            // Contrato de Judas: Espada / Exterminador
+            judasContract: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#141419" stroke="#FFD700" stroke-width="6"/>
+                    <path d="M 100,20 L 180,100 L 100,180 Z" fill="#FF8C00"/>
+                    <path d="M 100,20 L 20,100 L 100,180 Z" fill="#0055FF"/>
+                    <line x1="100" y1="15" x2="100" y2="185" stroke="#000" stroke-width="6"/>
+                </svg>`,
+
+            // Mulher-Maravilha Sangue: Tiara e Estrela
+            wonderWomanTiara: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#E50914" stroke="#FFD700" stroke-width="6"/>
+                    <polygon points="30,80 100,120 170,80 160,110 100,140 40,110" fill="#FFD700"/>
+                    <polygon points="100,90 106,105 122,105 109,115 114,130 100,120 86,130 91,115 78,105 94,105" fill="#E50914"/>
+                </svg>`,
+
+            // All-Star Comics #8: Águia / Escudo Sociedade da Justiça
+            justiceSociety: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0055FF" stroke="#FFD700" stroke-width="8"/>
+                    <polygon points="100,30 160,70 140,150 100,175 60,150 40,70" fill="#FFD700"/>
+                    <polygon points="100,45 107,65 128,65 111,78 117,98 100,85 83,98 89,78 72,65 93,65" fill="#E50914"/>
+                </svg>`,
+
+            // Asilo Arkham: Portão / A Gótico
+            arkhamAsylum: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0a0a0c" stroke="#8E24AA" stroke-width="8"/>
+                    <path d="M 50,160 L 100,30 L 150,160 M 70,110 L 130,110" stroke="#FFF" stroke-width="10" fill="none" stroke-linecap="round"/>
+                    <circle cx="100" cy="75" r="12" fill="#8E24AA"/>
+                </svg>`,
+
+            // Torre de Babel: Torre / Alvo
+            towerBabel: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0055FF" stroke="#FFD700" stroke-width="6"/>
+                    <polygon points="80,170 120,170 115,40 85,40" fill="#FFD700" stroke="#000" stroke-width="4"/>
+                    <line x1="70" y1="80" x2="130" y2="80" stroke="#E50914" stroke-width="6"/>
+                    <line x1="70" y1="120" x2="130" y2="120" stroke="#E50914" stroke-width="6"/>
+                </svg>`,
+
+            // Liga da Justiça Novos 52: Escudo LJA
+            justiceLeagueN52: `
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <circle cx="100" cy="100" r="85" fill="#0055FF" stroke="#FFF" stroke-width="8"/>
+                    <path d="M 60,50 L 100,50 L 100,130 Q 100,150 70,150 Z" fill="#FFD700"/>
+                    <polygon points="120,50 145,50 145,130 120,130" fill="#FFF"/>
+                </svg>`
+        };
+
+        const quizQuestions = [
+            {
+                id: 1,
+                iconSVG: SVGIcons.supermanShield,
+                category: "PERSONAGEM PRINCIPAL",
+                question: "Qual super-herói alienígena fez sua estréia na revista 'Action Comics #1' em 1938?",
+                options: ["Batman", "Superman", "Flash", "Capitão Marvel"],
+                correctIndex: 1,
+                explanation: "Superman (Clark Kent/Kal-El) estreou em Action Comics #1 (1938), dando início à Era de Ouro dos quadrinhos."
+            },
+            {
+                id: 2,
+                iconSVG: SVGIcons.batCowl,
+                category: "ANO DE PUBLICAÇÃO",
+                question: "Em qual ano foi lançada a edição 'Detective Comics #27', que apresentou o Batman pela primeira vez?",
+                options: ["1935", "1939", "1942", "1950"],
+                correctIndex: 1,
+                explanation: "Detective Comics #27 foi lançada em maio de 1939, criada por Bob Kane e Bill Finger."
+            },
+            {
+                id: 3,
+                iconSVG: SVGIcons.smileyBlood,
+                category: "AUTOR / ROTEIRISTA",
+                question: "Quem é o aclamado roteirista britânico que escreveu a obra-prima 'Watchmen' em 1986?",
+                options: ["Stan Lee", "Neil Gaiman", "Alan Moore", "Grant Morrison"],
+                correctIndex: 2,
+                explanation: "Alan Moore escreveu Watchmen, desconstruindo o mito dos super-heróis ao lado do desenhista Dave Gibbons."
+            },
+            {
+                id: 4,
+                iconSVG: SVGIcons.batLightning,
+                category: "AUTOR & PERSONAGEM",
+                question: "Quem escreveu e desenhou 'O Cavaleiro das Trevas' (1986), mostrando um Batman idoso voltando à ativa?",
+                options: ["Frank Miller", "Jim Lee", "Jack Kirby", "Geoff Johns"],
+                correctIndex: 0,
+                explanation: "Frank Miller revolucionou os quadrinhos em 1986 com o tom sombrio e maduro de 'The Dark Knight Returns'."
+            },
+            {
+                id: 5,
+                iconSVG: SVGIcons.jokerSmile,
+                category: "PERSONAGEM & HISTÓRIA",
+                question: "Em 'A Piada Mortal' (1988), qual vilão comete um ataque brutal contra Bárbara Gordon?",
+                options: ["Penguin", "Coringa (Joker)", "Charada", "Duas-Caras"],
+                correctIndex: 1,
+                explanation: "O Coringa ataca Bárbara Gordon na tentativa de enlouquecer o Comissário Gordon e provar sua tese sobre 'um dia ruim'."
+            },
+            {
+                id: 6,
+                iconSVG: SVGIcons.kingdomSymbol,
+                category: "ANO DE PUBLICAÇÃO",
+                question: "Em que ano foi publicada a minissérie 'Reino do Amanhã' (Kingdom Come), pintada por Alex Ross?",
+                options: ["1988", "1996", "2001", "2010"],
+                correctIndex: 1,
+                explanation: "Kingdom Come foi lançada em 1996 com roteiro de Mark Waid e espetaculares arte em aquarela de Alex Ross."
+            },
+            {
+                id: 7,
+                iconSVG: SVGIcons.dreamHelm,
+                category: "AUTOR / CRIADOR",
+                question: "Qual autor criou a icônica série 'Sandman' para o selo Vertigo da DC em 1989?",
+                options: ["Garth Ennis", "Neil Gaiman", "Warren Ellis", "Brian K. Vaughan"],
+                correctIndex: 1,
+                explanation: "Neil Gaiman escreveu as 75 edições de Sandman, acompanhando Morpheus, o Rei dos Sonhos."
+            },
+            {
+                id: 8,
+                iconSVG: SVGIcons.vMask,
+                category: "PERSONAGEM PRINCIPAL",
+                question: "Qual anarquista mascarado luta contra um regime fascista na HQ 'V de Vingança'?",
+                options: ["Rorschach", "Codinome V", "Questão", "Gavião Negro"],
+                correctIndex: 1,
+                explanation: "O protagonista 'V' usa a máscara de Guy Fawkes enquanto combate um governo totalitário numa Inglaterra distópica."
+            },
+            {
+                id: 9,
+                iconSVG: SVGIcons.swampThing,
+                category: "AUTOR / ROTEIRISTA",
+                question: "Quem escreveu a célebre edição 'Lição de Anatomia' na HQ do Monstro do Pântano?",
+                options: ["Alan Moore", "Grant Morrison", "Peter Milligan", "Jamie Delano"],
+                correctIndex: 0,
+                explanation: "Alan Moore assumiu o título em 1984 e redefiniu a origem do Monstro do Pântano na edição #21."
+            },
+            {
+                id: 10,
+                iconSVG: SVGIcons.flashLightning,
+                category: "PERSONAGEM PRINCIPAL",
+                question: "Na saga 'Ponto de Ignição' (Flashpoint, 2011), qual herói altera o tempo ao tentar salvar sua mãe?",
+                options: ["Superman", "Batman", "Barry Allen (Flash)", "Hal Jordan"],
+                correctIndex: 2,
+                explanation: "Barry Allen volta no tempo para salvar Nora Allen, criando uma linha temporal alternativa que gerou Os Novos 52."
+            },
+            {
+                id: 11,
+                iconSVG: SVGIcons.allStarSun,
+                category: "AUTOR & HISTÓRIA",
+                question: "Quem escreveu a aclamada HQ 'Grandes Astros: Superman' (All-Star Superman) entre 2005 e 2008?",
+                options: ["Grant Morrison", "Geoff Johns", "Mark Millar", "Tom King"],
+                correctIndex: 0,
+                explanation: "Grant Morrison (com artes de Frank Quitely) criou uma ode poética e emocionante aos últimos dias do Superman."
+            },
+            {
+                id: 12,
+                iconSVG: SVGIcons.crisisGlobe,
+                category: "ANO DE PUBLICAÇÃO",
+                question: "Em que ano começou a ser publicada a saga 'Crise nas Infinitas Terras' para reorganizar o Universo DC?",
+                options: ["1975", "1985", "1995", "2005"],
+                correctIndex: 1,
+                explanation: "Publicada em 1985 (roteiro de Marv Wolfman e arte de George Pérez), a Crise unificou o Multiverso da DC."
+            },
+            {
+                id: 13,
+                iconSVG: SVGIcons.batYearOne,
+                category: "PERSONAGEM & EQUIPE",
+                question: "Na HQ 'Batman: Ano Um', além de Bruce Wayne, qual policial novato chega a Gotham City?",
+                options: ["Harvey Dent", "Jim Gordon", "Lucius Fox", "Dick Grayson"],
+                correctIndex: 1,
+                explanation: "A história de Frank Miller e David Mazzucchelli narra paralelamente os primeiros passos de Bruce Wayne e Jim Gordon."
+            },
+            {
+                id: 14,
+                iconSVG: SVGIcons.greenLanternRing,
+                category: "PERSONAGEM PRINCIPAL",
+                question: "Em 'Crepúsculo Esmeralda' (1994), qual Lanterna Verde enlouquece após a destruição de Coast City?",
+                options: ["John Stewart", "Guy Gardner", "Hal Jordan", "Kyle Rayner"],
+                correctIndex: 2,
+                explanation: "Hal Jordan perde o controle após a destruição de sua cidade natal, destrói a Tropa e se torna o vilão Parallax."
+            },
+            {
+                id: 15,
+                iconSVG: SVGIcons.judasContract,
+                category: "EQUIPE & HISTÓRIA",
+                question: "Qual equipe de jovens heróis enfrenta a traição de Terra na HQ 'O Contrato de Judas'?",
+                options: ["Novos Titãs", "Justiça Jovem", "Légion dos Super-Heróis", "Patrulha do Destino"],
+                correctIndex: 0,
+                explanation: "Em 'O Contrato de Judas' (1984), os Novos Titãs enfrentam o Exterminador e a traição secreta da integrante Terra."
+            },
+            {
+                id: 16,
+                iconSVG: SVGIcons.wonderWomanTiara,
+                category: "AUTOR / ROTEIRISTA",
+                question: "Quem escreveu a fase de reinvenção da Mulher-Maravilha focada na mitologia grega em 2011 ('Sangue')?",
+                options: ["Brian Azzarello", "Gail Simone", "Greg Rucka", "George Pérez"],
+                correctIndex: 0,
+                explanation: "Brian Azzarello assinou a fase dos Novos 52 da Mulher-Maravilha, com visual e tom focado nos deuses do Olimpo."
+            },
+            {
+                id: 17,
+                iconSVG: SVGIcons.justiceSociety,
+                category: "ANO DE PUBLICAÇÃO",
+                question: "Em qual ano a revista 'All-Star Comics #8' apresentou a Mulher-Maravilha pela primeira vez?",
+                options: ["1941", "1950", "1963", "1971"],
+                correctIndex: 0,
+                explanation: "All-Star Comics #8 foi lançada no final de 1941, criada por William Moulton Marston."
+            },
+            {
+                id: 18,
+                iconSVG: SVGIcons.arkhamAsylum,
+                category: "AUTOR / DESENHISTA",
+                question: "Qual artista ilustrou com estilo surrealista e sombrio a graphic novel 'Asilo Arkham' (1989)?",
+                options: ["Alex Ross", "Dave McKean", "Todd McFarlane", "Tim Sale"],
+                correctIndex: 1,
+                explanation: "Dave McKean criou as ilustrações pintadas e fotos colagens perturbadoras para o roteiro de Grant Morrison."
+            },
+            {
+                id: 19,
+                iconSVG: SVGIcons.towerBabel,
+                category: "EQUIPE & HISTÓRIA",
+                question: "Na história 'Torre de Babel', planos contingentes de qual herói são roubados para derrotar a Liga da Justiça?",
+                options: ["Superman", "Batman", "Ciborgue", "Caçador de Marte"],
+                correctIndex: 1,
+                explanation: "Ra's al Ghul rouba os planos secretos mantidos por Batman para neutralizar individualmente cada membro da Liga."
+            },
+            {
+                id: 20,
+                iconSVG: SVGIcons.justiceLeagueN52,
+                category: "ANO DE PUBLICAÇÃO",
+                question: "Em que ano foi lançado o reboot 'Os Novos 52' com a revista 'Liga da Justiça #1'?",
+                options: ["2000", "2008", "2011", "2016"],
+                correctIndex: 2,
+                explanation: "Em setembro de 2011, a DC lançou Os Novos 52 (The New 52), reiniciando todas as suas numerações do número #1."
+            }
+        ];
+
+        class QuizEngine {
+            constructor(questions) {
+                this.questions = questions;
+                this.currentIndex = 0;
+                this.score = 0;
+                this.canAnswer = true;
+
+                // DOM Elements
+                this.dom = {
+                    startScreen: document.getElementById('start-screen'),
+                    quizScreen: document.getElementById('quiz-screen'),
+                    resultScreen: document.getElementById('result-screen'),
+                    questionTracker: document.getElementById('question-tracker'),
+                    scoreTracker: document.getElementById('score-tracker'),
+                    iconContainer: document.getElementById('icon-container'),
+                    comicTypeBadge: document.getElementById('comic-type-badge'),
+                    categoryNameBadge: document.getElementById('category-name-badge'),
+                    questionTypeLabel: document.getElementById('question-type-label'),
+                    questionText: document.getElementById('question-text'),
+                    optionsContainer: document.getElementById('options-container'),
+                    feedbackPanel: document.getElementById('feedback-panel'),
+                    feedbackIcon: document.getElementById('feedback-icon'),
+                    feedbackTitle: document.getElementById('feedback-title'),
+                    feedbackText: document.getElementById('feedback-text'),
+                    nextBtn: document.getElementById('next-btn'),
+                    // Results
+                    resultBadge: document.getElementById('result-badge'),
+                    finalCorrect: document.getElementById('final-correct'),
+                    finalPercentage: document.getElementById('final-percentage'),
+                    finalRank: document.getElementById('final-rank'),
+                    resultMessage: document.getElementById('result-message')
+                };
+            }
+
+            startQuiz() {
+                this.currentIndex = 0;
+                this.score = 0;
+                this.dom.startScreen.classList.add('hidden');
+                this.dom.resultScreen.classList.add('hidden');
+                this.dom.quizScreen.classList.remove('hidden');
+                this.loadQuestion();
+            }
+
+            loadQuestion() {
+                this.canAnswer = true;
+                const q = this.questions[this.currentIndex];
+
+                // Updates counters
+                this.dom.questionTracker.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
+                this.dom.scoreTracker.textContent = this.score * 50;
+
+                // Hide Feedback & Next button
+                this.dom.feedbackPanel.classList.add('hidden');
+                this.dom.nextBtn.classList.add('hidden');
+
+                // Inject SVG Symbol (No titles or year text spoilers)
+                this.dom.iconContainer.innerHTML = q.iconSVG;
+                this.dom.comicTypeBadge.textContent = "DC COMICS";
+                this.dom.categoryNameBadge.textContent = q.category;
+                this.dom.questionTypeLabel.textContent = `PERGUNTA ${this.currentIndex + 1}`;
+                this.dom.questionText.textContent = q.question;
+
+                // Build Options A, B, C, D
+                this.dom.optionsContainer.innerHTML = '';
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn w-full text-left p-4 rounded-xl bg-black/50 text-white font-semibold flex items-center space-x-3 text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-dcYellow';
+                    btn.setAttribute('onclick', `quizApp.selectOption(${idx})`);
+                    
+                    const letter = String.fromCharCode(65 + idx);
+                    btn.innerHTML = `
+                        <span class="w-8 h-8 rounded-lg bg-dcYellow text-black font-black flex items-center justify-center text-sm flex-shrink-0">
+                            ${letter}
+                        </span>
+                        <span class="flex-grow">${opt}</span>
+                    `;
+                    this.dom.optionsContainer.appendChild(btn);
+                });
+            }
+
+            selectOption(selectedIndex) {
+                if (!this.canAnswer) return;
+                this.canAnswer = false;
+
+                const q = this.questions[this.currentIndex];
+                const optionButtons = this.dom.optionsContainer.children;
+                const isCorrect = selectedIndex === q.correctIndex;
+
+                // Disable all option buttons to prevent multiple clicks
+                for (let btn of optionButtons) {
+                    btn.disabled = true;
+                }
+
+                if (isCorrect) {
+                    this.score++;
+                    optionButtons[selectedIndex].classList.add('animate-success');
+                    this.showFeedback(true, "RESPOSTA CORRETA!", q.explanation);
+                } else {
+                    optionButtons[selectedIndex].classList.add('animate-error');
+                    // Highlight correct answer for deaf learners visual reinforcement
+                    optionButtons[q.correctIndex].classList.add('animate-success');
+                    this.showFeedback(false, "RESPOSTA INCORRETA", q.explanation);
+                }
+
+                // Update score tracker
+                this.dom.scoreTracker.textContent = this.score * 50;
+
+                // Display Next button
+                this.dom.nextBtn.classList.remove('hidden');
+            }
+
+            showFeedback(isCorrect, title, text) {
+                const panel = this.dom.feedbackPanel;
+                panel.classList.remove('hidden', 'bg-dcGreen/20', 'border-dcGreen', 'bg-dcRed/20', 'border-dcRed');
+
+                if (isCorrect) {
+                    panel.classList.add('bg-dcGreen/20', 'border-dcGreen');
+                    this.dom.feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-check text-dcGreen"></i>`;
+                    this.dom.feedbackTitle.className = "font-bold text-lg text-dcGreen";
+                } else {
+                    panel.classList.add('bg-dcRed/20', 'border-dcRed');
+                    this.dom.feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-xmark text-dcRed"></i>`;
+                    this.dom.feedbackTitle.className = "font-bold text-lg text-dcRed";
+                }
+
+                this.dom.feedbackTitle.textContent = title;
+                this.dom.feedbackText.textContent = text;
+            }
+
+            nextQuestion() {
+                this.currentIndex++;
+                if (this.currentIndex < this.questions.length) {
+                    this.loadQuestion();
+                } else {
+                    this.showResults();
+                }
+            }
+
+            showResults() {
+                this.dom.quizScreen.classList.add('hidden');
+                this.dom.resultScreen.classList.remove('hidden');
+
+                const total = this.questions.length;
+                const percentage = Math.round((this.score / total) * 100);
+
+                this.dom.finalCorrect.textContent = `${this.score} / ${total}`;
+                this.dom.finalPercentage.textContent = `${percentage}%`;
+
+                if (percentage >= 90) {
+                    this.dom.resultBadge.className = "w-28 h-28 rounded-full flex items-center justify-center text-6xl shadow-2xl border-4 border-black bg-dcYellow text-black";
+                    this.dom.resultBadge.innerHTML = `<i class="fa-solid fa-trophy"></i>`;
+                    this.dom.finalRank.textContent = "MESTRE DAS HQS";
+                    this.dom.resultMessage.textContent = "Excelente! Você domina a história, criadores e épocas de publicação do Universo DC!";
+                } else if (percentage >= 60) {
+                    this.dom.resultBadge.className = "w-28 h-28 rounded-full flex items-center justify-center text-6xl shadow-2xl border-4 border-black bg-dcBlue text-white";
+                    this.dom.resultBadge.innerHTML = `<i class="fa-solid fa-star"></i>`;
+                    this.dom.finalRank.textContent = "LEITOR HEROICO";
+                    this.dom.resultMessage.textContent = "Parabéns! Você demonstrou ótimo conhecimento visual e histórico sobre as HQs clássicas!";
+                } else {
+                    this.dom.resultBadge.className = "w-28 h-28 rounded-full flex items-center justify-center text-6xl shadow-2xl border-4 border-black bg-dcRed text-white";
+                    this.dom.resultBadge.innerHTML = `<i class="fa-solid fa-book-open"></i>`;
+                    this.dom.finalRank.textContent = "APRENDIZ DE HQS";
+                    this.dom.resultMessage.textContent = "Bom trabalho! Releia as explicações e jogue novamente para memorizar os ícones e autores!";
+                }
+            }
+
+            restartQuiz() {
+                this.startQuiz();
+            }
+        }
+
+        // Global quiz instance
+        let quizApp;
+        window.onload = function() {
+            quizApp = new QuizEngine(quizQuestions);
+        };
+    </script>
+</body>
+</html>
